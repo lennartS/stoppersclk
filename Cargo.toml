@@ -1,0 +1,7 @@
+[package]
+name = "stoppersclk"
+version = "0.1.0"
+authors = ["Lennart Sauerbeck <devel@lennart.sauerbeck.org>"]
+
+[dependencies]
+gtk = "0.1.0"
