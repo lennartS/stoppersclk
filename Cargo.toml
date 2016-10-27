@@ -5,4 +5,8 @@ authors = ["Lennart Sauerbeck <devel@lennart.sauerbeck.org>"]
 license = "GPL-3.0+"
 
 [dependencies]
-gtk = "0.1.0"
+glib = { version = "0.1.0" }
+gtk = { version = "0.1.0", features = ["v3_10"] }
+log = "^0.3"
+env_logger = "^0.3"
+time = "^0.1"
