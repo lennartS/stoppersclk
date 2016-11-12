@@ -122,9 +122,7 @@ pub fn init_and_show() {
                 found'");
                 if tb_start_stop.get_active() {
                     state.last_started_on = Some(time::PreciseTime::now());
-                    tb_start_stop.set_label("Pause");
                 } else {
-                    tb_start_stop.set_label("Start");
                     state.runtime_till_last_pause = match state.last_started_on {
                         Some(x) => {
                             Some(state.runtime_till_last_pause
