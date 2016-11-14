@@ -87,10 +87,7 @@ pub fn init_and_show() {
     let tb_start_stop: ToggleButton = builder.get_object("tb_start_stop").expect("ToggleButton
     'tb_start_stop' not found.");
     let bt_reset: Button = builder.get_object("bt_reset").expect("Button 'bt_reset' not found.");
-    {
-        let lb_total_time = builder.get_object("lb_total").expect("Label 'lb_total' not found.");
-        reset_time_label(&lb_total_time);
-    }
+    reset_time_label(&get_total_time_label(&builder));
 
     // TODO We should only add this function when the clock is actually running
     glib::timeout_add(1, update_time);
