@@ -28,6 +28,8 @@ use time;
 struct State {
     runtime_till_last_pause: Option<time::Duration>,
     last_started_on: Option<time::PreciseTime>,
+    laptime_till_last_pause: Option<time::Duration>,
+    lap_started_on: Option<time::PreciseTime>,
 }
 
 // declare a new thread local storage key
@@ -41,6 +43,10 @@ fn reset_time_label(label: &Label) {
 
 fn get_total_time_label(builder: &Builder) -> Label {
     builder.get_object("lb_total").expect("Label 'lb_total' not found.")
+}
+
+fn get_lap_time_label(builder: &Builder) -> Label {
+    builder.get_object("lb_lap").expect("Label 'lb_lap' not found.")
 }
 
 // Do I really have to implement this myself? Surely it's already somewhere in std?
@@ -68,8 +74,16 @@ fn update_time() -> glib::Continue {
                     }
                     None => time::Duration::seconds(0),
                 };
-
                 get_total_time_label(builder).set_markup(format_duration(&passed).as_str());
+
+                let lap_passed = match state.lap_started_on {
+                    Some(x) => {
+                        x.to(current) +
+                        state.laptime_till_last_pause.unwrap_or_else(|| time::Duration::seconds(0))
+                    }
+                    None => time::Duration::seconds(0),
+                };
+                get_lap_time_label(builder).set_markup(format_duration(&lap_passed).as_str());
             }
         }
     });
@@ -88,6 +102,8 @@ pub fn init_and_show() {
     'tb_start_stop' not found.");
     let bt_reset: Button = builder.get_object("bt_reset").expect("Button 'bt_reset' not found.");
     reset_time_label(&get_total_time_label(&builder));
+    let bt_lap: Button = builder.get_object("bt_lap").expect("Button 'bt_lap' not found.");
+    reset_time_label(&get_lap_time_label(&builder));
 
     // TODO We should only add this function when the clock is actually running
     glib::timeout_add(1, update_time);
@@ -97,6 +113,8 @@ pub fn init_and_show() {
                                      State {
             runtime_till_last_pause: None,
             last_started_on: None,
+            laptime_till_last_pause: None,
+            lap_started_on: None,
         }))
     });
 
@@ -119,6 +137,7 @@ pub fn init_and_show() {
                 found'");
                 if tb_start_stop.get_active() {
                     state.last_started_on = Some(time::PreciseTime::now());
+                    state.lap_started_on = Some(time::PreciseTime::now());
                 } else {
                     state.runtime_till_last_pause = match state.last_started_on {
                         Some(x) => {
@@ -129,6 +148,15 @@ pub fn init_and_show() {
                         None => state.runtime_till_last_pause,
                     };
                     state.last_started_on = None;
+                    state.laptime_till_last_pause = match state.lap_started_on {
+                        Some(x) => {
+                            Some(state.laptime_till_last_pause
+                                .unwrap_or_else(|| time::Duration::seconds(0)) +
+                                 x.to(time::PreciseTime::now()))
+                        }
+                        None => state.laptime_till_last_pause,
+                    };
+                    state.lap_started_on = None;
                 }
 
             }
@@ -145,10 +173,26 @@ pub fn init_and_show() {
                     reset_time_label(&get_total_time_label(builder));
                     state.last_started_on = None;
                     state.runtime_till_last_pause = None;
+
+                    reset_time_label(&get_lap_time_label(builder));
+                    state.lap_started_on = None;
+                    state.laptime_till_last_pause = None;
                 } else {
                     state.last_started_on = Some(time::PreciseTime::now());
                     state.runtime_till_last_pause = None;
+
+                    state.lap_started_on = Some(time::PreciseTime::now());
+                    state.laptime_till_last_pause = None;
                 }
+            }
+        });
+    });
+
+    bt_lap.connect_clicked(move |_| {
+        GLOBAL.with(move |global| {
+            if let Some((_, ref mut state)) = *global.borrow_mut() {
+                state.laptime_till_last_pause = None;
+                state.lap_started_on = Some(time::PreciseTime::now());
             }
         });
     });
