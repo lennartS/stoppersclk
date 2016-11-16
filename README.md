@@ -1,4 +1,4 @@
-# Stoppersclk
+# Stoppersclk [![Build Status](https://travis-ci.org/lennartS/stoppersclk.svg?branch=master)](https://travis-ci.org/lennartS/stoppersclk)
 
 A small stop watch/clock written in [Rust](https://www.rust-lang.org).
 
@@ -8,7 +8,9 @@ For now the feature-set is very limited. This may change in the future.
 ## Build
 
 ### Dependencies
-The only Rust version known to work at the moment is `1.12.1`.
+The oldest Rust version known to work is `1.12.1`.
+[Travis CI](https://travis-ci.org/) makes sure it works on stable and beta
+and tries to build nightly as well.
 
 Apart from some smaller crates Stoppersclk is built using the awesome [gtk-rs](https://crates.io/crates/gtk).
 
