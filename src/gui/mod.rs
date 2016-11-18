@@ -49,6 +49,10 @@ fn get_lap_time_label(builder: &Builder) -> Label {
     builder.get_object("lb_lap").expect("Label 'lb_lap' not found.")
 }
 
+fn get_start_stop_button(builder: &Builder) -> ToggleButton {
+    builder.get_object("tb_start_stop").expect("ToggleButton 'tb_start_stop' not found.")
+}
+
 // Do I really have to implement this myself? Surely it's already somewhere in std?
 fn format_duration(d: &time::Duration) -> String {
     let hours = d.num_hours();
@@ -62,9 +66,7 @@ fn format_duration(d: &time::Duration) -> String {
 fn update_time() -> glib::Continue {
     GLOBAL.with(|global| {
         if let Some((ref builder, ref mut state)) = *global.borrow_mut() {
-            let tb_start_stop: ToggleButton = builder.get_object("tb_start_stop")
-                .expect("ToggleButton
-            'tb_start_stop' not found.");
+            let tb_start_stop = get_start_stop_button(builder);
             if tb_start_stop.get_active() {
                 let current = time::PreciseTime::now();
                 let passed = match state.last_started_on {
@@ -98,8 +100,7 @@ pub fn init_and_show() {
         .expect("Window 'main_window' not found.");
     let menu_quit: ImageMenuItem = builder.get_object("menu_file_quit")
         .expect("Menu entry 'File | Quit' not found.");
-    let tb_start_stop: ToggleButton = builder.get_object("tb_start_stop").expect("ToggleButton
-    'tb_start_stop' not found.");
+    let tb_start_stop = get_start_stop_button(&builder);
     let bt_reset: Button = builder.get_object("bt_reset").expect("Button 'bt_reset' not found.");
     reset_time_label(&get_total_time_label(&builder));
     let bt_lap: Button = builder.get_object("bt_lap").expect("Button 'bt_lap' not found.");
@@ -132,9 +133,7 @@ pub fn init_and_show() {
     tb_start_stop.connect_toggled(move |_| {
         GLOBAL.with(move |global| {
             if let Some((ref builder, ref mut state)) = *global.borrow_mut() {
-                let tb_start_stop: ToggleButton = builder.get_object("tb_start_stop")
-                    .expect("ToggleButton 'tb_start_stop' not
-                found'");
+                let tb_start_stop = get_start_stop_button(builder);
                 if tb_start_stop.get_active() {
                     state.last_started_on = Some(time::PreciseTime::now());
                     state.lap_started_on = Some(time::PreciseTime::now());
@@ -166,9 +165,7 @@ pub fn init_and_show() {
     bt_reset.connect_clicked(move |_| {
         GLOBAL.with(move |global| {
             if let Some((ref builder, ref mut state)) = *global.borrow_mut() {
-                let tb_start_stop: ToggleButton = builder.get_object("tb_start_stop")
-                    .expect("ToggleButton 'tb_start_stop' not
-                found'");
+                let tb_start_stop = get_start_stop_button(builder);
                 if !tb_start_stop.get_active() {
                     reset_time_label(&get_total_time_label(builder));
                     state.last_started_on = None;
